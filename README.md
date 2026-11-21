@@ -3,8 +3,27 @@
 A small job board for an insiderOne work sample. The jobs and companies are made up.
 Students can search and filter jobs, save the ones they like, and come back to them later.
 
+## How it looks
+
+**Main page.** Jobs with their location and stipend, the search box, filters and the saved panel.
+
+![Main page with the job list, filters and saved panel](https://github.com/user-attachments/assets/e1861a14-ce6e-40b8-a127-eee7c94e93f6)
+
+**Saving a job.** The button turns into a filled "Saved", the header badge counts saved jobs, and the job appears in the saved panel.
+
+![A saved job shown in the saved panel](https://github.com/user-attachments/assets/f760c77c-7d20-47ae-9b4b-c779d309a607)
+
+**Search and filters.** Search, location, minimum stipend and sort work together, with a Clear filters button.
+
+![Jobs narrowed down by search and filters](https://github.com/user-attachments/assets/42e653c4-5922-4f40-b65c-0f9118271c2b)
+
+**Tests.** All tests passing with `npm test`.
+
+![Terminal showing all tests passing](https://github.com/user-attachments/assets/a68587b2-db3e-4bab-9ad4-26d92a62a2e6)
+
 ## Demo 
 
+https://github.com/user-attachments/assets/fac79c0d-b8d8-476c-a20a-dde2a826c8d3
 
 
 ## Run it
