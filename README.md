@@ -56,3 +56,9 @@ I store only job ids in `saved.json`, not copies of the jobs. If a job is edited
 
 ### Tool use
 
+I used Claude (an AI assistant by Anthropic) to review this submission and check if I could improve anything. It also wrote the draft of this README section.
+
+What I did myself: I wrote the first version of `lib/saved.js`, the new routes in `server.js`, the changes to
+`public/app.js` and `public/index.html`, `test/saved.test.js`. I ran the app and the tests on my own machine, read through
+every file, and tried save, reload and remove in the browser. I understand how
+the save queue and the id-only storage work and can explain them.
