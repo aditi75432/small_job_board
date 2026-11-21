@@ -4,21 +4,63 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Job board</title>
-    <style>
-      body { font-family: system-ui, sans-serif; margin: 0 auto; max-width: 640px; padding: 16px; }
-      li { border: 1px solid #ddd; border-radius: 8px; list-style: none; margin: 8px 0; padding: 12px; }
-      ul { padding: 0; }
-      button { float: right; margin-left: 8px; }
-      input { font-size: 16px; padding: 8px; width: 100%; box-sizing: border-box; }
-    </style>
+    <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
-    <h1>Jobs</h1>
-    <input id="search" placeholder="Search by title, company or place" />
-    <ul id="jobs"></ul>
-    <h2>Saved jobs</h2>
-    <p id="saved-empty">Nothing saved yet.</p>
-    <ul id="saved"></ul>
+    <header class="top">
+      <div class="wrap top-inner">
+        <div>
+          <h1>Internship board</h1>
+          <p class="tagline">Find a role, save the ones you like, come back to them later.</p>
+        </div>
+        <a class="saved-link" href="#saved-panel">Saved <span id="saved-count" class="badge">0</span></a>
+      </div>
+    </header>
+
+    <main class="wrap layout">
+      <section aria-labelledby="jobs-heading">
+        <h2 id="jobs-heading" class="visually-hidden">Jobs</h2>
+
+        <form class="filters" role="search" onsubmit="return false">
+          <label class="field field-search">
+            <span>Search</span>
+            <input id="search" type="search" placeholder="Title, company or place" autocomplete="off" />
+          </label>
+          <label class="field">
+            <span>Location</span>
+            <select id="location"><option value="">Anywhere</option></select>
+          </label>
+          <label class="field">
+            <span>Minimum stipend</span>
+            <select id="min-stipend"><option value="">Any</option></select>
+          </label>
+          <label class="field">
+            <span>Sort by</span>
+            <select id="sort">
+              <option value="">Default</option>
+              <option value="stipend-desc">Stipend, high to low</option>
+              <option value="stipend-asc">Stipend, low to high</option>
+            </select>
+          </label>
+        </form>
+
+        <div class="results-bar">
+          <p id="count" aria-live="polite">Loading jobs...</p>
+          <button id="clear" class="link-button" type="button" hidden>Clear filters</button>
+        </div>
+
+        <ul id="jobs" class="cards"></ul>
+        <p id="jobs-empty" class="empty" hidden>No jobs match these filters. Try a different search or clear the filters.</p>
+      </section>
+
+      <aside id="saved-panel" class="saved" aria-labelledby="saved-heading">
+        <h2 id="saved-heading">Saved jobs</h2>
+        <p id="saved-empty" class="empty">Nothing saved yet. Press Save on a job and it will show up here.</p>
+        <ul id="saved" class="cards compact"></ul>
+      </aside>
+    </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
     <script type="module" src="/app.js"></script>
   </body>
 </html>

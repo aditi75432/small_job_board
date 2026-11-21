@@ -2,7 +2,15 @@
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
-import { findJob, loadJobs, searchJobs } from "./lib/jobs.js";
+import {
+  SORTS,
+  filterJobs,
+  filterOptions,
+  findJob,
+  loadJobs,
+  searchJobs,
+  sortJobs,
+} from "./lib/jobs.js";
 import { SavedStore, savedJobs } from "./lib/saved.js";
 
 const PORT = Number(process.env.PORT ?? 3000);
@@ -13,6 +21,13 @@ function sendJson(res, status, body) {
 }
 
 const MAX_BODY_BYTES = 10_000;
+
+// The only static files the server hands out, so no path can reach anything else.
+const STATIC_FILES = {
+  "/": { file: "index.html", type: "text/html" },
+  "/app.js": { file: "app.js", type: "text/javascript" },
+  "/styles.css": { file: "styles.css", type: "text/css" },
+};
 
 // An error that should reach the client as a specific status and message.
 class HttpError extends Error {
@@ -37,14 +52,29 @@ async function readJsonBody(req) {
   }
 }
 
+// Reads ?q=, ?location=, ?minStipend= and ?sort= and rejects values that make no sense.
+function readJobQuery(params) {
+  const minStipend = Number(params.get("minStipend") || 0);
+  if (!Number.isFinite(minStipend) || minStipend < 0) {
+    throw new HttpError(400, "minStipend must be a number, 0 or more");
+  }
+  const sort = params.get("sort") ?? "";
+  if (!SORTS.includes(sort)) throw new HttpError(400, `sort must be one of: ${SORTS.filter(Boolean).join(", ")}`);
+  return { q: params.get("q"), location: params.get("location") ?? "", minStipend, sort };
+}
+
 // `store` is passed in so tests can use a temporary file.
 export function createApp({ store = new SavedStore() } = {}) {
   return createServer(async (req, res) => {
     try {
       const url = new URL(req.url ?? "/", "http://localhost");
       if (req.method === "GET" && url.pathname === "/api/jobs") {
-        const jobs = await loadJobs();
-        return sendJson(res, 200, searchJobs(jobs, url.searchParams.get("q")));
+        const { q, location, minStipend, sort } = readJobQuery(url.searchParams);
+        const found = filterJobs(searchJobs(await loadJobs(), q), { location, minStipend });
+        return sendJson(res, 200, sortJobs(found, sort));
+      }
+      if (req.method === "GET" && url.pathname === "/api/jobs/options") {
+        return sendJson(res, 200, filterOptions(await loadJobs()));
       }
 
       if (url.pathname === "/api/saved" && req.method === "GET") {
@@ -70,11 +100,10 @@ export function createApp({ store = new SavedStore() } = {}) {
         return sendJson(res, 200, { removed: jobId });
       }
 
-      if (req.method === "GET" && (url.pathname === "/" || url.pathname === "/app.js")) {
-        const file = url.pathname === "/" ? "index.html" : "app.js";
-        const type = file.endsWith(".html") ? "text/html" : "text/javascript";
-        const body = await readFile(new URL(`./public/${file}`, import.meta.url));
-        res.writeHead(200, { "content-type": `${type}; charset=utf-8` });
+      const asset = req.method === "GET" ? STATIC_FILES[url.pathname] : undefined;
+      if (asset) {
+        const body = await readFile(new URL(`./public/${asset.file}`, import.meta.url));
+        res.writeHead(200, { "content-type": `${asset.type}; charset=utf-8` });
         return res.end(body);
       }
       sendJson(res, 404, { error: "Not found" });
